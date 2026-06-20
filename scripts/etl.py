@@ -174,6 +174,7 @@ def traiter_csv(chemin_csv):
             """
             INSERT INTO erreurs (transaction_id, motif, donnee_brute)
             VALUES %s
+            ON CONFLICT (transaction_id, motif) DO NOTHING
         """,
             [
                 (e["transaction_id"], e["motif"], e["donnee_brute"])

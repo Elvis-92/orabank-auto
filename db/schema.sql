@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS erreurs (
     transaction_id INTEGER,
     motif VARCHAR(255) NOT NULL,
     donnee_brute TEXT,
-    detecte_le TIMESTAMP DEFAULT NOW()
+    detecte_le TIMESTAMP DEFAULT NOW(),
+    UNIQUE (transaction_id, motif)
 );
