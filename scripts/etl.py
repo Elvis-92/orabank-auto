@@ -8,7 +8,7 @@ DB_CONFIG = {
     "host": "localhost",
     "database": "orabank_db",
     "user": "postgres",
-    "password": "",
+    "password": "27109",
 }
 
 TYPES_VALIDES = ["virement", "retrait", "depot"]
@@ -65,9 +65,17 @@ def valider_transaction(row, ids_vus):
     if str(row["compte_emetteur"]) == str(row["compte_beneficiaire"]):
         erreurs.append("Émetteur identique au bénéficiaire")
 
-    # Règle 8 — Doublon
-    if row["id"] in ids_vus:
-        erreurs.append(f"Transaction dupliquée : id {row['id']}")
+    # Règle 8 — Doublon par contenu
+    signature = (
+        str(row["montant"]),
+        str(row["compte_emetteur"]),
+        str(row["compte_beneficiaire"]),
+        str(row["date"]),
+    )
+    if signature in ids_vus:
+        erreurs.append(
+            f"Transaction dupliquée : contenu identique à une transaction existante"
+        )
 
     return erreurs
 
@@ -95,7 +103,14 @@ def traiter_csv(chemin_csv):
 
     for _, row in df.iterrows():
         erreurs = valider_transaction(row, ids_vus)
-        ids_vus.add(row["id"])
+        ids_vus.add(
+            (
+                str(row["montant"]),
+                str(row["compte_emetteur"]),
+                str(row["compte_beneficiaire"]),
+                str(row["date"]),
+            )
+        )
 
         if erreurs:
             for motif in erreurs:
@@ -179,5 +194,6 @@ def traiter_csv(chemin_csv):
     print(f"  ❌ Erreurs        : {len(erreurs_detectees)}")
     print(f"{'='*50}\n")
 
-    if __name__ == "__main__":
-        traiter_csv("data/transactions.csv")
+
+if __name__ == "__main__":
+    traiter_csv("data/transactions.csv")
